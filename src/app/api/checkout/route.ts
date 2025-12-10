@@ -17,15 +17,20 @@ export async function POST(req: Request) {
         }
 
         const body = await req.json();
-        const { priceId, areaCode } = body;
+        const { priceId, areaCode, type, returnUrl } = body;
 
         if (!priceId) {
             return new NextResponse('Missing Price ID', { status: 400 });
         }
 
+        const successBaseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://dialsignal.io';
+        const finalSuccessUrl = returnUrl
+            ? `${successBaseUrl}${returnUrl}?success=true&session_id={CHECKOUT_SESSION_ID}`
+            : `${successBaseUrl}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`;
+
         // Create Checkout Session
         const session = await stripe.checkout.sessions.create({
-            mode: 'subscription',
+            mode: 'subscription', // Note: 'number' might be one-time, 'remediation' might be one-time. Check usage.
             payment_method_types: ['card'],
             customer_email: user.email,
             line_items: [
@@ -36,11 +41,11 @@ export async function POST(req: Request) {
             ],
             metadata: {
                 userId: user.id,
-                areaCode: areaCode || 'Any', // Store area code preference to provision later
-                type: 'clean_number_subscription'
+                areaCode: areaCode || 'Any',
+                type: type || 'clean_number_subscription'
             },
-            success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dialsignal.io'}/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dialsignal.io'}/dashboard?canceled=true`,
+            success_url: finalSuccessUrl,
+            cancel_url: `${successBaseUrl}/dashboard?canceled=true`,
         });
 
         return NextResponse.json({ url: session.url });

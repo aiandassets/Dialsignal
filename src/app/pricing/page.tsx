@@ -1,6 +1,12 @@
+```javascript
+'use client';
+
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
-import { Check, Shield } from 'lucide-react';
+import { Check, Shield, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { useRouter } from 'next/navigation';
 
 export const metadata = {
     title: "Pricing | DialSignal",
@@ -11,6 +17,7 @@ const tiers = [
     {
         name: 'Single Reputation Check',
         id: 'tier-check',
+        action: 'link',
         href: '/',
         priceMonthly: '$0',
         description: 'Instant analysis of any US phone number.',
@@ -24,7 +31,8 @@ const tiers = [
     {
         name: 'Verified Clean Number',
         id: 'tier-number',
-        href: '/dashboard',
+        action: 'link',
+        href: '/numbers/search', // Updated to point to inventory search
         priceMonthly: '$29',
         description: 'Get a guaranteed clean business line ready to use.',
         features: [
@@ -39,7 +47,8 @@ const tiers = [
     {
         name: 'Enterprise Remediation',
         id: 'tier-enterprise',
-        href: '/remediate/intake',
+        action: 'checkout',
+        priceId: 'price_enterprise_remediation_123', // Replace with real ID
         priceMonthly: '$499',
         description: 'Full service remediation for labeled numbers.',
         features: [
@@ -58,6 +67,43 @@ function classNames(...classes: string[]) {
 }
 
 export default function Pricing() {
+    const [loadingId, setLoadingId] = useState<string | null>(null);
+    const router = useRouter();
+
+    const handleCheckout = async (priceId: string, tierId: string) => {
+        try {
+            setLoadingId(tierId);
+            const response = await fetch('/api/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    priceId,
+                    type: 'remediation', // Tell API this is for remediation
+                    returnUrl: '/remediate/intake' // Where to go after success
+                }),
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                 // Likely 401 Unauthorized - redirect to login
+                 if (response.status === 401) {
+                     router.push('/login?next=/pricing');
+                     return;
+                 }
+                 throw new Error(data.message || 'Checkout failed');
+            }
+
+            // Redirect to Stripe
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Failed to start checkout. Please try logging in first.');
+        } finally {
+            setLoadingId(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#0b1120] text-slate-100 font-sans">
             <Navbar />
@@ -95,6 +141,35 @@ export default function Pricing() {
                                 {tier.name !== 'Single Reputation Check' && <span className="text-base text-gray-400">/one-time</span>}
                             </p>
                             <p className="mt-6 text-base leading-7 text-gray-300">{tier.description}</p>
+                            
+                            {tier.action === 'checkout' ? (
+                                <button
+                                    onClick={() => handleCheckout(tier.priceId!, tier.id)}
+                                    disabled={loadingId === tier.id}
+                                    className={classNames(
+                                        tier.featured
+                                            ? 'bg-indigo-600 shadow-sm hover:bg-indigo-500'
+                                            : 'bg-white/10 hover:bg-white/20',
+                                        'mt-8 w-full block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors disabled:opacity-50 disabled:cursor-wait'
+                                    )}
+                                >
+                                    {loadingId === tier.id ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Get started'}
+                                </button>
+                            ) : (
+                                <Link
+                                    href={tier.href!}
+                                    aria-describedby={tier.id}
+                                    className={classNames(
+                                        tier.featured
+                                            ? 'bg-indigo-600 shadow-sm hover:bg-indigo-500'
+                                            : 'bg-white/10 hover:bg-white/20',
+                                        'mt-8 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors'
+                                    )}
+                                >
+                                    Get started
+                                </Link>
+                            )}
+                            
                             <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-300">
                                 {tier.features.map((feature) => (
                                     <li key={feature} className="flex gap-x-3">
@@ -103,18 +178,6 @@ export default function Pricing() {
                                     </li>
                                 ))}
                             </ul>
-                            <Link
-                                href={tier.href}
-                                aria-describedby={tier.id}
-                                className={classNames(
-                                    tier.featured
-                                        ? 'bg-indigo-600 shadow-sm hover:bg-indigo-500'
-                                        : 'bg-white/10 hover:bg-white/20',
-                                    'mt-8 block rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors'
-                                )}
-                            >
-                                Get started
-                            </Link>
                         </div>
                     ))}
                 </div>
