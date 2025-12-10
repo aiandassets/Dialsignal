@@ -28,7 +28,7 @@ export default function LoginPage() {
                     email,
                     password,
                     options: {
-                        emailRedirectTo: `${location.origin}/auth/callback`,
+                        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://dialsignal.io'}/auth/callback`,
                     },
                 });
                 if (error) throw error;

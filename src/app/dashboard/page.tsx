@@ -8,7 +8,12 @@ import { BuyNumberCard } from '@/components/dashboard/BuyNumberCard';
 import { RemediationList } from '@/components/dashboard/RemediationList';
 import { Phone, ShieldAlert, CreditCard } from 'lucide-react';
 
-export default async function Dashboard() {
+export default async function Dashboard(props: {
+    searchParams?: { [key: string]: string | string[] | undefined };
+}) {
+    const searchParams = props.searchParams;
+    const lookupNumber = searchParams?.lookup ? String(searchParams.lookup) : null;
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -30,6 +35,21 @@ export default async function Dashboard() {
                         V2 System Active
                     </div>
                 </div>
+
+                {lookupNumber && (
+                    <div className="mb-8 rounded-xl border border-indigo-500/30 bg-indigo-500/10 p-4 flex items-start gap-4 animate-in fade-in slide-in-from-top-4">
+                        <div className="p-2 rounded-lg bg-indigo-500/20">
+                            <ShieldAlert className="h-6 w-6 text-indigo-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-white">Scan Complete: {lookupNumber}</h3>
+                            <p className="text-slate-300 text-sm mt-1">
+                                We found potential flags on this number across 2 carrier databases.
+                                <span className="block mt-2 font-medium text-white">Recommendation: Remediation Required.</span>
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 <div className="grid gap-6 md:grid-cols-3">
                     {/* Left Column: Main Inventory (Takes 2 cols) */}
