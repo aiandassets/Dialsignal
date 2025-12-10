@@ -1,4 +1,3 @@
-```javascript
 'use client';
 
 import Link from 'next/link';
@@ -8,10 +7,6 @@ import { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { useRouter } from 'next/navigation';
 
-export const metadata = {
-    title: "Pricing | DialSignal",
-    description: "Simple, transparent pricing for clean business phone numbers.",
-};
 
 const tiers = [
     {
@@ -76,7 +71,7 @@ export default function Pricing() {
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     priceId,
                     type: 'remediation', // Tell API this is for remediation
                     returnUrl: '/remediate/intake' // Where to go after success
@@ -84,14 +79,14 @@ export default function Pricing() {
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
-                 // Likely 401 Unauthorized - redirect to login
-                 if (response.status === 401) {
-                     router.push('/login?next=/pricing');
-                     return;
-                 }
-                 throw new Error(data.message || 'Checkout failed');
+                // Likely 401 Unauthorized - redirect to login
+                if (response.status === 401) {
+                    router.push('/login?next=/pricing');
+                    return;
+                }
+                throw new Error(data.message || 'Checkout failed');
             }
 
             // Redirect to Stripe
@@ -141,7 +136,7 @@ export default function Pricing() {
                                 {tier.name !== 'Single Reputation Check' && <span className="text-base text-gray-400">/one-time</span>}
                             </p>
                             <p className="mt-6 text-base leading-7 text-gray-300">{tier.description}</p>
-                            
+
                             {tier.action === 'checkout' ? (
                                 <button
                                     onClick={() => handleCheckout(tier.priceId!, tier.id)}
@@ -169,7 +164,7 @@ export default function Pricing() {
                                     Get started
                                 </Link>
                             )}
-                            
+
                             <ul role="list" className="mt-8 space-y-3 text-sm leading-6 text-gray-300">
                                 {tier.features.map((feature) => (
                                     <li key={feature} className="flex gap-x-3">

@@ -1,4 +1,3 @@
-```javascript
 'use client';
 
 import { useState } from 'react';
@@ -15,7 +14,7 @@ export function SearchHero() {
     const handleCheck = (e: React.FormEvent) => {
         e.preventDefault();
         if (!phoneNumber) return;
-        
+
         setStatus('scanning');
         setProgress(0);
 
@@ -67,15 +66,15 @@ export function SearchHero() {
                 </div>
 
                 <div className="flex flex-col gap-3">
-                    <Link 
+                    <Link
                         href="/remediate/intake"
                         className="w-full block rounded-xl bg-emerald-600 px-8 py-3 text-center text-lg font-bold text-white shadow-lg hover:bg-emerald-500 transition-all hover:scale-[1.02]"
                     >
                         Fix This Number Now
                     </Link>
-                    <button 
-                         onClick={() => { setStatus('idle'); setPhoneNumber(''); }}
-                         className="text-slate-500 text-sm hover:text-white transition-colors"
+                    <button
+                        onClick={() => { setStatus('idle'); setPhoneNumber(''); }}
+                        className="text-slate-500 text-sm hover:text-white transition-colors"
                     >
                         Check Another Number
                     </button>
@@ -89,17 +88,17 @@ export function SearchHero() {
             <div className="mt-12 bg-white/5 backdrop-blur-xl border border-indigo-500/30 rounded-2xl p-12 max-w-2xl mx-auto shadow-2xl relative z-20">
                 <div className="flex flex-col items-center justify-center space-y-6">
                     <div className="relative h-16 w-16">
-                         <div className="absolute inset-0 rounded-full border-4 border-indigo-500/30"></div>
-                         <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-spin"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-indigo-500/30"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-spin"></div>
                     </div>
                     <div className="text-center">
                         <h3 className="text-xl font-bold text-white mb-2">Analyzing Carrier Data...</h3>
                         <p className="text-slate-400 font-mono text-sm">{phoneNumber}</p>
                     </div>
                     <div className="w-full bg-black/50 rounded-full h-2 overflow-hidden max-w-xs">
-                        <div 
-                            className="bg-indigo-500 h-full transition-all duration-75 ease-out" 
-                            style={{ width: `${ progress }% ` }}
+                        <div
+                            className="bg-indigo-500 h-full transition-all duration-75 ease-out"
+                            style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
@@ -128,7 +127,7 @@ export function SearchHero() {
                     Secure lookup. No data storage.
                 </p>
                 <div className="mt-6">
-                    <button 
+                    <button
                         type="submit"
                         className="w-full block rounded-xl bg-indigo-600 px-8 py-4 text-center text-lg font-bold text-white shadow-lg hover:bg-indigo-500 hover:shadow-indigo-500/25 transition-all hover:scale-[1.01] flex items-center justify-center gap-2"
                     >
@@ -139,4 +138,3 @@ export function SearchHero() {
         </div>
     );
 }
-```
