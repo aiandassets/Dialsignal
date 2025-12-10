@@ -5,6 +5,7 @@ import { Navbar } from '@/components/Navbar';
 // import { AreaCodeSearch } from '@/components/dashboard/AreaCodeSearch'; // We'll port/rebuild this next
 // import { ActiveNumbersList } from '@/components/dashboard/ActiveNumbersList'; // We'll port this too
 import { BuyNumberCard } from '@/components/dashboard/BuyNumberCard';
+import { RemediationList } from '@/components/dashboard/RemediationList';
 import { Phone, ShieldAlert, CreditCard } from 'lucide-react';
 
 export default async function Dashboard() {
@@ -38,12 +39,9 @@ export default async function Dashboard() {
                         <div className="rounded-xl border border-white/10 bg-white/5 p-6">
                             <h3 className="font-semibold text-lg flex items-center gap-2 mb-4">
                                 <Phone className="h-5 w-5 text-indigo-400" />
-                                Your Active Numbers
+                                Remediation Cases
                             </h3>
-                            <div className="text-center py-12 text-slate-500 border border-dashed border-white/10 rounded-lg">
-                                <p>You verify numbers will appear here.</p>
-                                {/* <ActiveNumbersList /> - Will implement next step */}
-                            </div>
+                            <RemediationList />
                         </div>
 
                     </div>
