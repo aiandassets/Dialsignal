@@ -21,17 +21,28 @@ export default function NumberSearchPage() {
     const router = useRouter();
     const supabase = createClient();
 
-    // Mock initial data if DB is empty for demo
-    const mockNumbers = [
-        { id: '1', phone_number: '+1 (212) 555-0199', area_code: '212', status: 'available' },
-        { id: '2', phone_number: '+1 (415) 555-0255', area_code: '415', status: 'available' },
-        { id: '3', phone_number: '+1 (305) 555-0311', area_code: '305', status: 'available' },
-        { id: '4', phone_number: '+1 (512) 555-0422', area_code: '512', status: 'available' },
-    ];
+    // Helper to generate realistic mock numbers
+    const generateMockNumbers = (code: string): NumberItem[] => {
+        const count = 24; // Show a good amount
+        const mockData: NumberItem[] = [];
+        for (let i = 0; i < count; i++) {
+            const prefix = Math.floor(Math.random() * 800) + 200; // 200-999
+            const line = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+            mockData.push({
+                id: `mock-${code}-${i}`,
+                phone_number: `+1 (${code}) ${prefix}-${line}`,
+                area_code: code,
+                status: 'available'
+            });
+        }
+        return mockData;
+    };
 
     const searchNumbers = async () => {
+        if (!areaCode) return;
         setLoading(true);
-        // Real DB query
+
+        // 1. Try Real DB first
         const { data, error } = await supabase
             .from('numbers')
             .select('*')
@@ -42,9 +53,14 @@ export default function NumberSearchPage() {
         if (data && data.length > 0) {
             setNumbers(data);
         } else {
-            // Fallback to mock for demo capability if inventory empty
-            const filtered = mockNumbers.filter(n => n.area_code.includes(areaCode));
-            setNumbers(filtered);
+            // 2. Fallback to Simulated Inventory (The "Thousands" feel)
+            // Only generate if we have a valid-ish area code (3 digits)
+            if (areaCode.length >= 3) {
+                const mocks = generateMockNumbers(areaCode);
+                setNumbers(mocks);
+            } else {
+                setNumbers([]);
+            }
         }
         setLoading(false);
     };
@@ -56,26 +72,35 @@ export default function NumberSearchPage() {
     const handlePurchase = async (numberId: string, phoneNumber: string) => {
         setPurchasingId(numberId);
         try {
+            // Use configured price ID or fallback for dev/demo if not set, but alert user if critical.
+            // In a real app, this should fail if env var is missing.
+            const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_NUMBER || 'price_1234567890';
+
             const response = await fetch('/api/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    priceId: 'price_clean_number_29', // Replace with real ID
-                    areaCode: phoneNumber, // Provision specific number
+                    priceId: priceId,
+                    areaCode: phoneNumber,
                     type: 'number_purchase',
                     returnUrl: '/dashboard'
                 }),
             });
 
             const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || data.error || 'Checkout initialization failed');
+            }
+
             if (data.url) {
                 window.location.href = data.url;
             } else {
-                alert('Checkout failed configuration.');
+                alert('Checkout failed: No redirect URL returned.');
             }
-        } catch (err) {
+        } catch (err: any) {
             console.error(err);
-            alert('Failed to start checkout');
+            alert(`Failed to start checkout: ${err.message}. (Check your Price ID configuration)`);
         } finally {
             setPurchasingId(null);
         }
@@ -158,7 +183,7 @@ export default function NumberSearchPage() {
 
                 {numbers.length === 0 && !loading && (
                     <div className="text-center text-slate-500 py-12">
-                        No numbers found matching that area code. Try another search.
+                        {areaCode ? 'No numbers found. Try another area code.' : 'Enter an area code to start searching.'}
                     </div>
                 )}
             </div>

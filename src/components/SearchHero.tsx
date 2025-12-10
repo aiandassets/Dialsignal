@@ -67,7 +67,7 @@ export function SearchHero() {
 
                 <div className="flex flex-col gap-3">
                     <Link
-                        href="/remediate/intake"
+                        href="/pricing"
                         className="w-full block rounded-xl bg-emerald-600 px-8 py-3 text-center text-lg font-bold text-white shadow-lg hover:bg-emerald-500 transition-all hover:scale-[1.02]"
                     >
                         Fix This Number Now
