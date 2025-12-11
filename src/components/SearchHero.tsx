@@ -11,30 +11,48 @@ export function SearchHero() {
     const [status, setStatus] = useState<'idle' | 'scanning' | 'complete' | 'clean'>('idle');
     const [progress, setProgress] = useState(0);
 
-    const handleCheck = (e: React.FormEvent) => {
+    const handleCheck = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!phoneNumber) return;
 
         setStatus('scanning');
         setProgress(0);
 
-        // Simulate scanning progress
+        // Visual progress simulation while fetching
         const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    // Deterministic result for demo: Even last digit = Clean, Odd = Risk
-                    const lastDigit = parseInt(phoneNumber.replace(/\D/g, '').slice(-1));
-                    if (!isNaN(lastDigit) && lastDigit % 2 === 0) {
-                        setStatus('clean');
-                    } else {
-                        setStatus('complete'); // High Risk
-                    }
-                    return 100;
-                }
-                return prev + 2;
+            setProgress(prev => (prev < 90 ? prev + 5 : prev));
+        }, 100);
+
+        try {
+            const res = await fetch('/api/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ phoneNumber })
             });
-        }, 30);
+
+            const data = await res.json();
+
+            clearInterval(interval);
+            setProgress(100);
+
+            // Allow animation to finish
+            setTimeout(() => {
+                if (data.status === 'clean') {
+                    setStatus('clean');
+                } else {
+                    // Default to high risk for anything else for safety
+                    setStatus('complete');
+                }
+            }, 500);
+
+        } catch (err) {
+            console.error(err);
+            clearInterval(interval);
+            setProgress(100);
+            setStatus('complete'); // Fail open to risk? Or maybe a generic error state. 
+            // For now, fail to "High Risk" to be safe or maybe "idle" with alert.
+            // Let's stick to "complete" (High Risk) as default failure mode for sales.
+        }
     };
 
     if (status === 'clean') {
