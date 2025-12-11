@@ -33,9 +33,9 @@ const tiers = [
         features: [
             'Guaranteed "Spam Likely" Free',
             '30-Day Reputation Monitoring',
-            'Instant Provisioning',
+            'Number Rental ($29/mo)',
             'Sms & Voice Capable',
-            'Export to any Carrier',
+            'Port-Out Available',
         ],
         featured: true,
     },
@@ -43,7 +43,7 @@ const tiers = [
         name: 'Enterprise Remediation',
         id: 'tier-enterprise',
         action: 'checkout',
-        priceId: 'price_enterprise_remediation_123', // Replace with real ID
+        priceId: 'price_1Sd6tzGargl3vZqGYn3syEL5', // Real Enterprise Remediation ID
         priceMonthly: '$499',
         description: 'Full service remediation for labeled numbers.',
         features: [

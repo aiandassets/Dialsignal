@@ -58,7 +58,7 @@ export function BuyNumberCard() {
             <div className="space-y-4">
                 <div className="bg-black/40 rounded-lg p-3 border border-white/10">
                     <label className="text-xs text-slate-500 uppercase font-bold">Price</label>
-                    <div className="text-2xl font-bold text-white">$29.00 <span className="text-sm text-slate-500 font-normal">/one-time</span></div>
+                    <div className="text-2xl font-bold text-white">$29.00 <span className="text-sm text-slate-500 font-normal">/mo</span></div>
                 </div>
 
                 <button

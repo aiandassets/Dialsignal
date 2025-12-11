@@ -72,9 +72,8 @@ export default function NumberSearchPage() {
     const handlePurchase = async (numberId: string, phoneNumber: string) => {
         setPurchasingId(numberId);
         try {
-            // Use configured price ID or fallback for dev/demo if not set, but alert user if critical.
-            // In a real app, this should fail if env var is missing.
-            const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_NUMBER || 'price_1234567890';
+            // Use configured price ID or fallback
+            const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_NUMBER || 'price_1ScZBWGargl3vZqGyoUIxydE';
 
             const response = await fetch('/api/checkout', {
                 method: 'POST',

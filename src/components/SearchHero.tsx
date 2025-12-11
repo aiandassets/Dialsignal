@@ -8,7 +8,7 @@ import Link from 'next/link';
 export function SearchHero() {
     const router = useRouter();
     const [phoneNumber, setPhoneNumber] = useState('');
-    const [status, setStatus] = useState<'idle' | 'scanning' | 'complete'>('idle');
+    const [status, setStatus] = useState<'idle' | 'scanning' | 'complete' | 'clean'>('idle');
     const [progress, setProgress] = useState(0);
 
     const handleCheck = (e: React.FormEvent) => {
@@ -23,13 +23,65 @@ export function SearchHero() {
             setProgress(prev => {
                 if (prev >= 100) {
                     clearInterval(interval);
-                    setStatus('complete');
+                    // Deterministic result for demo: Even last digit = Clean, Odd = Risk
+                    const lastDigit = parseInt(phoneNumber.replace(/\D/g, '').slice(-1));
+                    if (!isNaN(lastDigit) && lastDigit % 2 === 0) {
+                        setStatus('clean');
+                    } else {
+                        setStatus('complete'); // High Risk
+                    }
                     return 100;
                 }
                 return prev + 2;
             });
         }, 30);
     };
+
+    if (status === 'clean') {
+        return (
+            <div className="mt-12 bg-white/5 backdrop-blur-xl border border-emerald-500/30 rounded-2xl p-8 max-w-2xl mx-auto shadow-2xl relative z-20 animate-in fade-in zoom-in-95 duration-500">
+                <div className="flex items-center gap-3 mb-6 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+                    <CheckCircle className="h-6 w-6 text-emerald-500" />
+                    <h3 className="text-emerald-400 font-bold text-lg">Number Verified Clean</h3>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div className="bg-black/40 rounded-xl p-4 border border-white/5">
+                        <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Reputation Score</p>
+                        <p className="text-3xl font-bold text-emerald-500">98<span className="text-sm text-slate-500">/100</span></p>
+                    </div>
+                    <div className="bg-black/40 rounded-xl p-4 border border-white/5">
+                        <p className="text-slate-400 text-xs uppercase tracking-wider mb-1">Risk Level</p>
+                        <p className="text-3xl font-bold text-emerald-500">Low</p>
+                    </div>
+                </div>
+
+                <div className="space-y-4 mb-8 text-left">
+                    <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
+                        <span className="text-slate-300">Carrier databases flagged:</span>
+                        <span className="font-mono text-emerald-400">0 / 5 Major</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm border-b border-white/5 pb-2">
+                        <span className="text-slate-300">Spam Reports:</span>
+                        <span className="font-mono text-white">None Detected</span>
+                    </div>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                    <button
+                        onClick={() => { setStatus('idle'); setPhoneNumber(''); }}
+                        className="w-full block rounded-xl bg-white/10 px-8 py-3 text-center text-lg font-bold text-white shadow-lg hover:bg-white/20 transition-all border border-white/10"
+                    >
+                        Check Another Number
+                    </button>
+                    <p className="text-xs text-center text-emerald-500/60 mt-2">
+                        <CheckCircle className="inline w-3 h-3 mr-1" />
+                        Ready for trusted communication
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     if (status === 'complete') {
         return (
